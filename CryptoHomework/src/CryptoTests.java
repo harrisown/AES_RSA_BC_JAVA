@@ -7,48 +7,75 @@ public class CryptoTests {
 
 	public static void main(String[] args) throws Exception {
 		Security.addProvider(new BouncyCastleProvider());
-		System.out.println("Enter your secret!");
+		System.out.print("Enter your secret: ");
 		Scanner sc = new Scanner(System.in);
 		String secret = sc.nextLine();
 		AEStest(secret);
-
+		RSAtest(secret);
 	}
 
-	public static void AEStest(String secret)throws Exception{
+	private static void RSAtest(String secret)throws Exception{
+		System.out.println("---------RSA TEST--------");
 		byte[] plainText = secret.getBytes("UTF8");
-		// Get a AES private key
-		System.out.println("\nStart generating AES key");
-		Key key = GenerateSymmetricKey(192);
-		System.out.println("Finish generating AES key");
+		System.out.println("Starting generation of RSA key pair...");
+		KeyPair keys = GenerateASymmetricKeys(192);
+		System.out.println("Finished generating RSA key pair");
 		
-		// Creates the AES Cipher object (specifying the algorithm, mode, and
-		// padding).
-		Cipher cipher = Cipher.getInstance("AES/ECB/PKCS7Padding","BC");
-		// Print the provider information
-		System.out.println("\n" + cipher.getProvider().getInfo());
-		//
-		System.out.println("\nStart encryption");
-		// Initializes the Cipher object.
-		cipher.init(Cipher.ENCRYPT_MODE, key);
-		// Encrypt the plaintext using the public key
+		Cipher cipher = Cipher.getInstance("RSA/ECB/NoPadding", "BC");
+		System.out.println("Starting encryption..");
+		cipher.init(Cipher.ENCRYPT_MODE, keys.getPublic());//encrypt using the public key from KeyPair
 		byte[] cipherText = cipher.doFinal(plainText);
-		System.out.println("Finish encryption: ");
-		System.out.println(new String(cipherText, "UTF8"));
+		System.out.print("Finish encryption: ");
+		System.out.println(new String(cipherText, "UTF8")+ " is the encrypted message!");
 		
-		System.out.println("\nStart decryption");
-		// Initializes the Cipher object.
-		cipher.init(Cipher.DECRYPT_MODE, key);
-		// Decrypt the ciphertext using the same key
+		System.out.println("Starting decryption...");
+		cipher.init(Cipher.DECRYPT_MODE, keys.getPrivate());//decrypt using the private key from KeyPair
 		byte[] newPlainText = cipher.doFinal(cipherText);
-		System.out.println("Finish decryption: ");
-		System.out.println(new String(newPlainText, "UTF8"));
+		System.out.print("Finished decryption: ");
+		System.out.println(new String(newPlainText, "UTF8")+ " is the decrypted ciphertext!");
+		System.out.println("---------END OF RSA TEST--------");
+		System.out.println("");
+
 	}
-	
+
+	public static void AEStest(String secret) throws Exception {
+		byte[] plainText = secret.getBytes("UTF8");
+
+		System.out.println("---------AES TEST--------");
+		System.out.println("");
+		System.out.println("Starting generation of AES key...");
+		Key key = GenerateSymmetricKey(192);
+		System.out.println("Finished generating AES key");
+
+		Cipher cipher = Cipher.getInstance("AES/ECB/PKCS7Padding", "BC");
+		System.out.println("Starting encryption..");
+		cipher.init(Cipher.ENCRYPT_MODE, key); //encrypt using key
+
+		byte[] cipherText = cipher.doFinal(plainText);
+		System.out.print("Finish encryption: ");
+		System.out.println(new String(cipherText, "UTF8")+ " is the encrypted message!");
+
+		System.out.println("Starting decryption...");
+		cipher.init(Cipher.DECRYPT_MODE, key);//decrypte using the same key!
+		byte[] newPlainText = cipher.doFinal(cipherText);
+		System.out.print("Finished decryption: ");
+		System.out.println(new String(newPlainText, "UTF8")+ " is the decrypted ciphertext!");
+		System.out.println("---------END OF AES TEST---------");
+		System.out.println("");
+	}
+
 	public static SecretKey GenerateSymmetricKey(int keySizeInBits)throws Exception{
-		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES","BC");
+		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES", "BC");
 		keyGenerator.init(keySizeInBits);
 		SecretKey secretkey = keyGenerator.generateKey();
 		return secretkey;
+	}
+
+	public static KeyPair GenerateASymmetricKeys(int keySizeInBits)throws Exception {
+		 KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA","BC"); 
+         keyGenerator.initialize(192); 
+         KeyPair keys = keyGenerator.generateKeyPair(); 
+         return keys;
 	}
 
 }
