@@ -72,10 +72,10 @@ public class CryptoTests {
 	}
 
 	public static KeyPair GenerateASymmetricKeys(int keySizeInBits)throws Exception {
-		 KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA","BC"); 
-         keyGenerator.initialize(192); 
-         KeyPair keys = keyGenerator.generateKeyPair(); 
-         return keys;
+		KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA","BC"); 
+         	keyGenerator.initialize(192); 
+         	KeyPair keys = keyGenerator.generateKeyPair(); 
+         	return keys;
 	}
 
 }
