@@ -35,6 +35,7 @@ public class CryptoTests {
 		System.out.println(new String(newPlainText, "UTF8")+ " is the decrypted ciphertext!");
 		System.out.println("---------END OF RSA TEST--------");
 		System.out.println("");
+		RSASignAndVerify(newPlainText,keys);
 
 	}
 
@@ -62,6 +63,21 @@ public class CryptoTests {
 		System.out.println(new String(newPlainText, "UTF8")+ " is the decrypted ciphertext!");
 		System.out.println("---------END OF AES TEST---------");
 		System.out.println("");
+	}
+	
+	public static void RSASignAndVerify(byte[]data, KeyPair keys)throws Exception{
+		Signature signature = Signature.getInstance("RSA");
+		
+		signature.initSign(keys.getPrivate());
+		signature.update(data);
+		
+		System.out.println("Signature is "+signature.toString());
+		
+		signature.initVerify(keys.getPublic());
+		signature.update(data);
+		
+		System.out.println("Signature is "+signature.toString());
+		
 	}
 
 	public static SecretKey GenerateSymmetricKey(int keySizeInBits)throws Exception{
