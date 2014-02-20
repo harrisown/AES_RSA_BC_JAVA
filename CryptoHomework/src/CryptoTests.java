@@ -1,21 +1,25 @@
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 import java.security.*;
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class CryptoTests {
-
+public static ArrayList<String> stringArray = new ArrayList<String>();
+public static char[] alphabet = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
+	
 	public static void main(String[] args) throws Exception {
+
 		Security.addProvider(new BouncyCastleProvider());
 		System.out.print("Enter your secret: ");
 		Scanner sc = new Scanner(System.in);
 		String secret = sc.nextLine();
+		sc.close();
+
 		AEStest(secret);
 		RSAtest(secret);
-		sc.close();
+		GenerateRandomStrings(25);//input is size of string in characters
+		TimeTrials();
 	}
 
 	private static void RSAtest(String secret)throws Exception{
@@ -93,6 +97,43 @@ public class CryptoTests {
 
 	}
 
+	public static void GenerateRandomStrings(int sizeOfString){
+		Random rand = new Random();
+		while(stringArray.size()!= 100){ //generate 100 random strings
+			StringBuilder sb = new StringBuilder();
+			
+			for(int j = 0; j < sizeOfString;j++){
+				sb.append(alphabet[rand.nextInt(25)]);
+			}			
+			if(!stringArray.contains(sb.toString())){
+				stringArray.add(sb.toString());
+			}
+		}
+	}
+	
+	public static void TimeTrials()throws Exception{
+		Date d = new Date();
+		long startTimeAES = d.getTime();
+		for(int i = 0;i < 100;i++){
+			AEStest(stringArray.get(i));
+		}
+		Date e = new Date();
+		long endTimeAES = e.getTime();
+		
+		Date f = new Date();
+		long startTimeRSA = f.getTime();
+		for(int i = 0;i < 100;i++){
+			RSAtest(stringArray.get(i));
+		}
+		Date g = new Date();
+		long endTimeRSA = g.getTime();
+		
+		System.out.println("------TIME TRIALS COMPLETE!------");
+		System.out.println("AES Encryption/Decryption Test took: "+ (endTimeAES-startTimeAES) +" milliseconds to complete");
+		System.out.println("RSA Encryption/Decryption Test took: "+ (endTimeRSA-startTimeRSA) +" milliseconds to complete");
+		System.out.println("AES was "+(endTimeRSA-startTimeRSA)/(endTimeAES-startTimeAES)+"x faster than RSA");
+		
+	}
 	public static SecretKey GenerateSymmetricKey(int keySizeInBits)throws Exception{
 		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES", "BC");
 		keyGenerator.init(keySizeInBits);
@@ -102,9 +143,9 @@ public class CryptoTests {
 
 	public static KeyPair GenerateASymmetricKeys(int keySizeInBits)throws Exception {
 		KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA","BC"); 
-        	keyGenerator.initialize(keySizeInBits,new SecureRandom()); 
-        	KeyPair keys = keyGenerator.generateKeyPair(); 
-        	return keys;
+        keyGenerator.initialize(keySizeInBits,new SecureRandom()); 
+        KeyPair keys = keyGenerator.generateKeyPair(); 
+        return keys;
 	}
 
 }
