@@ -19,17 +19,21 @@ public class CryptoTests {
 	}
 
 	private static void RSAtest(String secret)throws Exception{
+		byte[] IV = new byte[16];
+		Random random = new SecureRandom();
+		random.nextBytes(IV);
+		
 		System.out.println("---------RSA TEST--------");
 		byte[] plainText = secret.getBytes("UTF8");
 		System.out.println("Starting generation of RSA key pair...");
-		KeyPair keys = GenerateASymmetricKeys(192);
+		KeyPair keys = GenerateASymmetricKeys(512);
 		System.out.println("Finished generating RSA key pair");
 		
 		Cipher cipher = Cipher.getInstance("RSA/ECB/NoPadding", "BC");
-		System.out.println("Starting encryption..");
+		System.out.println("Started encryption..");
 		cipher.init(Cipher.ENCRYPT_MODE, keys.getPublic());//encrypt using the public key from KeyPair
 		byte[] cipherText = cipher.doFinal(plainText);
-		System.out.print("Finish encryption: ");
+		System.out.println("Finished encryption: ");
 		System.out.println(new String(cipherText, "UTF8")+ " is the encrypted message!");
 		
 		System.out.println("Starting decryption...");
@@ -39,7 +43,7 @@ public class CryptoTests {
 		System.out.println(new String(newPlainText, "UTF8")+ " is the decrypted ciphertext!");
 		System.out.println("---------END OF RSA TEST--------");
 		System.out.println("");
-		RSASignAndVerify(newPlainText,keys);
+		RSASignAndVerify(secret,keys);
 
 	}
 
@@ -49,7 +53,7 @@ public class CryptoTests {
 		System.out.println("---------AES TEST--------");
 		System.out.println("");
 		System.out.println("Starting generation of AES key...");
-		Key key = GenerateSymmetricKey(192);
+		Key key = GenerateSymmetricKey(128);
 		byte[] IV = new byte[16];
 		Random random = new SecureRandom();
 		random.nextBytes(IV);
@@ -73,19 +77,20 @@ public class CryptoTests {
 		System.out.println("");
 	}
 	
-	public static void RSASignAndVerify(byte[]data, KeyPair keys)throws Exception{
-		Signature signature = Signature.getInstance("RSA");
-		
-		signature.initSign(keys.getPrivate());
-		signature.update(data);
-		
-		System.out.println("Signature is "+signature.toString());
-		
-		signature.initVerify(keys.getPublic());
-		signature.update(data);
-		
-		System.out.println("Signature is "+signature.toString());
-		
+	public static void RSASignAndVerify(String secret, KeyPair keyPair)throws Exception{
+		System.out.println("------Sign and Verify with RSA!------");
+	    Signature signature = Signature.getInstance("SHA1withRSA", "BC");
+	    
+	    signature.initSign(keyPair.getPrivate(), new SecureRandom());
+
+	    signature.update(secret.getBytes());
+	    
+	    byte[] sigBytes = signature.sign();
+	    signature.initVerify(keyPair.getPublic());
+	    signature.update(secret.getBytes());
+	    System.out.println("Signature is verified: "+signature.verify(sigBytes));
+	    System.out.println("------End of Verification!------");
+
 	}
 
 	public static SecretKey GenerateSymmetricKey(int keySizeInBits)throws Exception{
@@ -97,9 +102,9 @@ public class CryptoTests {
 
 	public static KeyPair GenerateASymmetricKeys(int keySizeInBits)throws Exception {
 		KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA","BC"); 
-         	keyGenerator.initialize(192); 
-         	KeyPair keys = keyGenerator.generateKeyPair(); 
-         	return keys;
+        	keyGenerator.initialize(keySizeInBits,new SecureRandom()); 
+        	KeyPair keys = keyGenerator.generateKeyPair(); 
+        	return keys;
 	}
 
 }
